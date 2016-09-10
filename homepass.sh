@@ -1,9 +1,9 @@
 #!/bin/sh
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/jffs/sbin:/jffs/bin:/jffs/usr/sbin:/jffs/usr/bin:/mmc/sbin:/mmc/bin:/mmc/usr/sbin:/mmc/usr/bin:/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin
 
+max=1
 relay_time="90"
-wifi="eth1"
-wl_mac=`nvram get wl0_hwaddr`
+
 mac_list="00:0D:67:15:2D:82
 00:0D:67:15:D7:21
 00:0D:67:15:D5:44
@@ -26,6 +26,9 @@ mac_list="00:0D:67:15:2D:82
 4E:53:50:4F:4F:4E
 4E:53:50:4F:4F:4F"
 
+wifi="eth1"
+wl_mac=`nvram get wl0_hwaddr`
+
 spoofMacAddress() {
     ifconfig ${wifi} down
     ifconfig ${wifi} hw ether $1
@@ -47,10 +50,13 @@ cleanup() {
     return 0
 }
 
-for i in $mac_list
+i=0
+while [ $i -lt $max ]
 do
-    echo "Spoofing ${wifi} to $i for ${relay_time} seconds..."
-    spoofMacAddress "$i"
+    addr=$(echo "$mac_list" | awk 'BEGIN{srand();} { a[i++]=$0 } END { r=int(rand()*i); print a[r] }')
+    echo "Spoofing ${wifi} to $addr for ${relay_time} seconds..."
+    spoofMacAddress "$addr"
+    true $(( i++ ))
 done
 
 echo "Restoring ${wifi} to ${wl_mac}"

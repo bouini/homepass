@@ -50,7 +50,7 @@ cleanup() {
 for i in $mac_list
 do
     echo "Spoofing ${wifi} to $i for ${relay_time} seconds..."
-###    spoofMacAddress "$i"
+    spoofMacAddress "$i"
 done
 
 echo "Restoring ${wifi} to ${wl_mac}"

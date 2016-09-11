@@ -29,7 +29,14 @@ mac_list="00:0D:67:15:2D:82
 wifi="eth1"
 wl_mac=$(nvram get wl0_hwaddr)
 
-spoofMacAddress() {
+ctrl_c() {
+    echo "*** Interrupted ***"
+    cleanup
+    exit $?
+}
+
+spoof() {
+    echo "Spoofing ${wifi} to $1 for ${relay_time} seconds..."
     ifconfig ${wifi} down
     ifconfig ${wifi} hw ether $1
     ifconfig ${wifi} up
@@ -41,6 +48,7 @@ spoofMacAddress() {
 }
 
 cleanup() {
+    echo "Restoring ${wifi} to ${wl_mac}"
     ifconfig ${wifi} down
     ifconfig ${wifi} hw ether ${wl_mac}
     ifconfig ${wifi} up
@@ -50,14 +58,12 @@ cleanup() {
     return 0
 }
 
-i=0
-while [ $i -lt $max ]
+trap ctrl_c SIGINT SIGTERM
+
+sel=$(echo "$mac_list" | awk -v n=\"$max\" 'BEGIN{ srand(); } { a[i++]=$0 } END { while(j<$n) { r=int(rand()*i); if( r in a ) { print a[r]; delete a[r]; j++; } } }')
+for i in $sel
 do
-    addr=$(echo "$mac_list" | awk 'BEGIN{srand();} { a[i++]=$0 } END { r=int(rand()*i); print a[r] }')
-    echo "Spoofing ${wifi} to $addr for ${relay_time} seconds..."
-    spoofMacAddress "$addr"
-    true $(( i++ ))
+    spoof "$i"
 done
 
-echo "Restoring ${wifi} to ${wl_mac}"
 cleanup

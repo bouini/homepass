@@ -3,6 +3,7 @@ PATH=/bin:/usr/bin:/sbin:/usr/sbin:/jffs/sbin:/jffs/bin:/jffs/usr/sbin:/jffs/usr
 
 max=5
 relay_time="90"
+sleep_time="10"
 
 mac_list="00:0D:67:15:2D:82
 00:0D:67:15:D7:21
@@ -26,7 +27,7 @@ mac_list="00:0D:67:15:2D:82
 4E:53:50:4F:4F:4E
 4E:53:50:4F:4F:4F"
 
-wifi="eth1"
+wifi=$(nvram get wl0_ifname)
 wl_mac=$(nvram get wl0_hwaddr)
 
 ctrl_c() {
@@ -37,9 +38,11 @@ ctrl_c() {
 
 spoof() {
     echo "Spoofing ${wifi} to $1 for ${relay_time} seconds..."
+    wl radio off
     ifconfig ${wifi} down
     ifconfig ${wifi} hw ether $1
     ifconfig ${wifi} up
+    sleep ${sleep_time}
     wl radio on
 
     sleep ${relay_time}
@@ -49,11 +52,10 @@ spoof() {
 
 cleanup() {
     echo "Restoring ${wifi} to ${wl_mac}"
+    wl radio off
     ifconfig ${wifi} down
     ifconfig ${wifi} hw ether ${wl_mac}
     ifconfig ${wifi} up
-    
-    wl radio off
 
     return 0
 }

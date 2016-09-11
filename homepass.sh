@@ -1,7 +1,7 @@
 #!/bin/sh
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/jffs/sbin:/jffs/bin:/jffs/usr/sbin:/jffs/usr/bin:/mmc/sbin:/mmc/bin:/mmc/usr/sbin:/mmc/usr/bin:/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin
 
-max=1
+max=5
 relay_time="90"
 
 mac_list="00:0D:67:15:2D:82
@@ -27,7 +27,7 @@ mac_list="00:0D:67:15:2D:82
 4E:53:50:4F:4F:4F"
 
 wifi="eth1"
-wl_mac=`nvram get wl0_hwaddr`
+wl_mac=$(nvram get wl0_hwaddr)
 
 spoofMacAddress() {
     ifconfig ${wifi} down
